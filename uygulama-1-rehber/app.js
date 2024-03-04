@@ -5,6 +5,7 @@ const surname = document.getElementById("surname");
 const mail = document.getElementById("mail");
 const form = document.getElementById("form-directory");
 const personList = document.querySelector(".person-list");
+const saEdButton = document.querySelector(".save-and-edit");
 
 // adding event listeners
 const contactList = [];
@@ -23,7 +24,7 @@ function save(e) {
   const value = verifyData(newPerson);
   if (value.cond) {
     if (selectedRow) {
-      //editing gonna resolve here
+      editPerson(newPerson);
     } else {
       addPerson(newPerson);
     }
@@ -31,6 +32,22 @@ function save(e) {
     createInfo(value.message, value.cond);
     //console.log(value.message);
   }
+}
+
+function editPerson(newPerson) {
+  for (let i = 0; i < contactList.length; i++) {
+    if (contactList[i].mail === selectedRow.cells[2].textContent) {
+      contactList[i] = newPerson;
+      break;
+    }
+  }
+
+  selectedRow.cells[0].textContent = newPerson.namee;
+  selectedRow.cells[1].textContent = newPerson.surname;
+  selectedRow.cells[2].textContent = newPerson.mail;
+
+  saEdButton.value = "SAVE";
+  selectedRow = undefined;
 }
 
 function addPerson(newPerson) {
@@ -96,14 +113,21 @@ function clearPlaces() {
 }
 
 function handleAction(event) {
-  // console.log(event.target);
   if (event.target.classList.contains("btn--delete")) {
     const deletedTr = event.target.parentElement.parentElement;
     const deletedMail =
       event.target.parentElement.previousElementSibling.textContent;
     handleDelete(deletedTr, deletedMail);
   } else if (event.target.classList.contains("btn--edit")) {
-    //handleEdit();
+    saEdButton.value = "EDIT";
+    const editingRow = event.target.parentElement.parentElement;
+    const editingMail = editingRow.cells[2].textContent;
+
+    namee.value = editingRow.cells[0].textContent;
+    surname.value = editingRow.cells[1].textContent;
+    mail.value = editingMail;
+
+    selectedRow = editingRow;
   }
 }
 
@@ -114,5 +138,7 @@ function handleDelete(a1, a2) {
       contactList.splice(index, 1);
     }
   });
+  clearPlaces();
+  saEdButton.value = "SAVE";
   // console.log(contactList);
 }
