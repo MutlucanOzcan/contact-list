@@ -1,0 +1,39 @@
+.btn {
+  border: 0;
+  outline: none;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.btn--edit {
+  color: green;
+}
+
+.btn--edit:hover {
+  color: rgba(0, 255, 0, 0.7);
+}
+
+.btn--delete {
+  color: red;
+}
+
+.btn--delete:hover {
+  color: rgba(255, 0, 0, 0.4);
+}
+
+.info {
+  padding: 1rem;
+  margin: 0.5rem;
+  border-radius: 3px;
+}
+
+.info--success {
+  border: 1px solid green;
+}
+
+.info--error {
+  border: 1px solid red;
+}
+.fa-solid {
+  pointer-events: none;
+}
