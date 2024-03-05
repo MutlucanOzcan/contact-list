@@ -17,6 +17,11 @@ class Util {
     });
     return result;
   }
+  static checkMail(email) {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  }
 }
 
 class Ui {
@@ -48,13 +53,21 @@ class Ui {
   }
 
   editPersonFromUi(person) {
-    this.storage.editPerson(person, this.selectedRow.cells[2].textContent);
-    this.selectedRow.cells[0].textContent = person.name;
-    this.selectedRow.cells[1].textContent = person.surname;
-    this.selectedRow.cells[2].textContent = person.mail;
-    this.clearZones();
-    this.selectedRow = undefined;
-    this.saveEditButton.value = "SAVE";
+    const result = this.storage.editPerson(
+      person,
+      this.selectedRow.cells[2].textContent
+    );
+    if (result) {
+      this.selectedRow.cells[0].textContent = person.name;
+      this.selectedRow.cells[1].textContent = person.surname;
+      this.selectedRow.cells[2].textContent = person.mail;
+      this.clearZones();
+      this.selectedRow = undefined;
+      this.saveEditButton.value = "SAVE";
+      this.statusInfo("Contact Edited!", true);
+    } else {
+      this.statusInfo("This mail is used before!", false);
+    }
   }
 
   clearZones() {
@@ -69,6 +82,7 @@ class Ui {
     this.storage.deletePerson(deleteMail);
     this.clearZones();
     this.selectedRow = undefined;
+    this.statusInfo("Deleted!", false);
   }
 
   prntPeopleFromStoragetoScreen() {
@@ -104,20 +118,30 @@ class Ui {
       person.surname,
       person.mail
     );
+    const checkingEmail = Util.checkMail(this.mail.value);
+    console.log(this.mail.value + "mail kontrol sonucu: " + checkingEmail);
     if (result) {
+      if (!checkingEmail) {
+        this.statusInfo("Please type a valid mail adress", false);
+        return;
+      }
       if (this.selectedRow) {
         //if selectedRow != undefined, we are gonna edit saved contact
         this.editPersonFromUi(person);
       } else {
         //if selectedRow = undefined, just add new contact.
-        this.statusInfo("Successfully Created!", true);
-        this.printNewPerson(person);
         //also we want to include local storage
-        this.storage.addPerson(person);
+        const result = this.storage.addPerson(person);
+        if (result) {
+          this.statusInfo("Successfully Created!", true);
+          this.printNewPerson(person);
+          this.clearZones();
+        } else {
+          this.statusInfo("This mail is used before!", false);
+        }
       }
-      this.clearZones();
     } else {
-      console.log("fill blank zones");
+      this.statusInfo("fill the blank zones", false);
     }
   }
   statusInfo(context, condition) {
@@ -149,8 +173,13 @@ class Storage {
     return allPersonsLocal;
   }
   addPerson(person) {
-    this.allPersons.push(person);
-    localStorage.setItem("allPersons", JSON.stringify(this.allPersons));
+    if (this.checkEmail(person.mail)) {
+      this.allPersons.push(person);
+      localStorage.setItem("allPersons", JSON.stringify(this.allPersons));
+      return true;
+    } else {
+      return false;
+    }
   }
   deletePerson(mail) {
     this.allPersons.forEach((person, index) => {
@@ -161,12 +190,39 @@ class Storage {
     localStorage.setItem("allPersons", JSON.stringify(this.allPersons));
   }
   editPerson(editedPerson, mail) {
-    this.allPersons.forEach((person, index) => {
-      if (person.mail === mail) {
-        this.allPersons[index] = editedPerson;
-      }
+    if (editedPerson.mail === mail) {
+      this.allPersons.forEach((person, index) => {
+        if (person.mail === mail) {
+          this.allPersons[index] = editedPerson;
+          localStorage.setItem("allPersons", JSON.stringify(this.allPersons));
+          return true;
+        }
+      });
+      return true;
+    }
+
+    if (this.checkEmail(editedPerson.mail)) {
+      this.allPersons.forEach((person, index) => {
+        if (person.mail === mail) {
+          this.allPersons[index] = editedPerson;
+          localStorage.setItem("allPersons", JSON.stringify(this.allPersons));
+          return true;
+        }
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
+  checkEmail(mail) {
+    const result = this.allPersons.find((person) => {
+      return person.mail === mail;
     });
-    localStorage.setItem("allPersons", JSON.stringify(this.allPersons));
+    if (result) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
 
