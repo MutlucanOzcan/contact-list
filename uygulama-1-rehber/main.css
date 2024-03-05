@@ -25,14 +25,18 @@
   padding: 1rem;
   margin: 0.5rem;
   border-radius: 3px;
+  opacity: 0;
+  transition: 0.5s ease-in-out;
 }
 
 .info--success {
   border: 1px solid green;
+  opacity: 1;
 }
 
 .info--error {
   border: 1px solid red;
+  opacity: 1;
 }
 .fa-solid {
   pointer-events: none;
